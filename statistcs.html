@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ប្រព័ន្ធបែងចែកសិស្សតាមវេន</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF7EF; --ink:#241B1B; --red:#C8342E; --red-dark:#9E241F;
+    --gold:#E3A72E; --paper:#FFFFFF; --line:#E7DED0;
+    --green:#3E7B5E; --blue:#3564A6; --purple:#7C4DA6; --teal:#1F8A8C; --amber:#B5791E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);font-family:'Noto Sans Khmer','Poppins',sans-serif;color:var(--ink);}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+
+  .band{
+    background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);
+    border-radius:18px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:16px;
+    box-shadow:0 8px 24px rgba(200,52,46,0.25);position:relative;overflow:hidden;
+  }
+  .band::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.08);}
+  .badge{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:800;font-size:20px;color:var(--red-dark);flex-shrink:0;box-shadow:0 0 0 4px rgba(255,255,255,0.25);}
+  .band h1{font-family:'Poppins',sans-serif;margin:0;font-size:22px;font-weight:700;}
+  .band p{margin:4px 0 0;font-size:13.5px;opacity:.9;font-weight:500;}
+
+  .tabs{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;}
+  .tabbtn{
+    padding:11px 18px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);
+    font-family:inherit;font-size:14px;font-weight:700;color:#8a7d6d;cursor:pointer;
+  }
+  .tabbtn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .addcard{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:18px;box-shadow:0 2px 10px rgba(36,27,27,0.04);}
+  .addcard h2{font-family:'Poppins',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--red-dark);margin:0 0 14px;font-weight:700;}
+  .addcard .lead{font-size:13.5px;color:#6b5f4f;margin:0 0 14px;}
+  .addrow{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;}
+  .addrow input[type=text], .addrow input[type=date]{
+    flex:1 1 180px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);
+    font-family:inherit;font-size:15px;background:#FFFDF9;
+  }
+  .addrow input:focus{outline:none;border-color:var(--red);}
+  .seg{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--line);flex:0 0 auto;}
+  .seg label{padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;background:#FFFDF9;color:var(--ink);white-space:nowrap;border-right:1.5px solid var(--line);}
+  .seg label:last-child{border-right:none;}
+  .seg input{display:none;}
+  .seg input:checked + label{color:#fff;}
+  .seg input:checked + label[data-cat="fulltime"]{background:var(--purple);}
+  .seg input:checked + label[data-cat="english"]{background:var(--blue);}
+  .seg input:checked + label[data-cat="khmer"]{background:var(--green);}
+  .addbtn{padding:12px 22px;border:none;border-radius:10px;background:var(--red);color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;}
+  .addbtn:hover{background:var(--red-dark);}
+  .addbtn:active{transform:scale(0.97);}
+  .hint{font-size:12.5px;color:#8a7d6d;margin-top:8px;}
+
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;}
+  @media (max-width:900px){.board{grid-template-columns:1fr;}}
+  .col{background:var(--paper);border-radius:16px;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;min-height:200px;box-shadow:0 2px 10px rgba(36,27,27,0.04);}
+  .col-head{padding:16px 18px;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+  .col[data-cat="fulltime"] .col-head{background:var(--purple);}
+  .col[data-cat="english"] .col-head{background:var(--blue);}
+  .col[data-cat="khmer"] .col-head{background:var(--green);}
+  .col-head h3{margin:0;font-size:16px;font-weight:700;}
+  .col-head .count{background:rgba(255,255,255,0.25);border-radius:999px;padding:3px 11px;font-size:13px;font-weight:700;}
+  .col-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:8px;}
+  .card{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;background:#FFFDF9;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14.5px;font-weight:500;}
+  .card .info{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .card .meta{font-size:12px;color:#8a7d6d;font-weight:500;}
+  .card .num{color:#a8977f;font-size:12.5px;font-weight:700;margin-right:6px;}
+  .card .del{background:none;border:none;cursor:pointer;color:#c2382f;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px;font-family:inherit;flex-shrink:0;}
+  .card .del:hover{background:#FBE4E2;}
+  .empty{color:#b3a58f;font-size:13.5px;text-align:center;padding:24px 10px;}
+  .loading{color:#b3a58f;font-size:13.5px;text-align:center;padding:24px 10px;}
+  .gtag{font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;margin-right:4px;display:inline-block;}
+  .gtag.male{background:#E4EEF9;color:var(--blue);}
+  .gtag.female{background:#FBE7EF;color:#B4487A;}
+  .gtag.unknown{background:#F0EAE0;color:#9C8C74;}
+  .catpill{font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;display:inline-block;color:#fff;}
+  .catpill.fulltime{background:var(--purple);}
+  .catpill.english{background:var(--blue);}
+  .catpill.khmer{background:var(--green);}
+
+  .col-foot{padding:10px 16px;border-top:1.5px dashed var(--line);background:#FBF7EF;font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between;}
+  .col-foot span{color:var(--red-dark);}
+
+  .grandtotal{
+    grid-column:1 / -1;
+    margin-top:0;border-radius:16px;padding:20px 26px;
+    background:linear-gradient(135deg,var(--gold) 0%,#C98A1E 100%);
+    display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+    box-shadow:0 8px 22px rgba(227,167,46,0.3);
+  }
+  .grandtotal .gt-label{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#4a3410;text-transform:uppercase;letter-spacing:.05em;}
+  .grandtotal .gt-value{font-family:'Poppins',sans-serif;font-size:30px;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .grandtotal .gt-value strong{font-size:34px;}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:12.5px;color:#8a7d6d;flex-wrap:wrap;gap:8px;}
+  .toolbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .reset{background:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;color:#8a7d6d;font-family:inherit;font-size:12.5px;}
+  .reset:hover{border-color:var(--red);color:var(--red);}
+  .pdfbtn{background:var(--red);border:1px solid var(--red);border-radius:8px;padding:7px 12px;cursor:pointer;color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;}
+  .pdfbtn:hover{background:var(--red-dark);border-color:var(--red-dark);}
+  .pdfbtn:disabled{opacity:.6;cursor:default;}
+
+  .simplecard{background:var(--paper);border:1px solid var(--line);border-radius:16px;margin-top:18px;box-shadow:0 2px 10px rgba(36,27,27,0.04);overflow:hidden;}
+  .simplecard .head{padding:16px 18px;color:#fff;background:var(--teal);display:flex;align-items:center;justify-content:space-between;}
+  .simplecard.care .head{background:var(--amber);}
+  .simplecard .head h3{margin:0;font-size:16px;font-weight:700;}
+  .simplecard .head .count{background:rgba(255,255,255,0.25);border-radius:999px;padding:3px 11px;font-size:13px;font-weight:700;}
+  .simplecard .body{padding:12px;display:flex;flex-direction:column;gap:8px;}
+
+  .overlay{position:fixed;inset:0;background:rgba(36,27,27,0.5);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:16px;padding:22px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+  .modal.add-modal{max-width:480px;}
+  .modal h3{margin:0 0 6px;font-size:16px;font-family:'Poppins',sans-serif;color:var(--red-dark);}
+  .modal p{margin:0 0 14px;font-size:13.5px;color:#6b5f4f;}
+  .modal textarea{width:100%;min-height:70px;border-radius:10px;border:1.5px solid var(--line);padding:10px 12px;font-family:inherit;font-size:14px;resize:vertical;}
+  .modal textarea:focus{outline:none;border-color:var(--red);}
+  .modal-extra{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+  .modal-extra label{display:block;font-size:12.5px;font-weight:700;color:var(--red-dark);margin:10px 0 5px;}
+  .modal-extra label:first-child{margin-top:0;}
+  .modal-extra input[type=text]{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);font-family:inherit;font-size:14px;background:#FFFDF9;}
+  .modal-extra input[type=text]:focus{outline:none;border-color:var(--red);}
+  .caretoggle{display:flex;gap:8px;}
+  .caretoggle button{flex:1;padding:10px;border-radius:9px;border:1.5px solid var(--line);background:#FFFDF9;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink);}
+  .caretoggle button.sel-yes{background:var(--green);border-color:var(--green);color:#fff;}
+  .caretoggle button.sel-no{background:#c2382f;border-color:#c2382f;color:#fff;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  .modal-actions button{border:none;border-radius:9px;padding:10px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+  .modal-actions .cancel{background:#F0EAE0;color:var(--ink);}
+  .modal-actions .confirm{background:var(--red);color:#fff;}
+  .modal-actions .confirm:hover{background:var(--red-dark);}
+
+  /* --- Add-student modal rows --- */
+  .add-row-item{border:1.5px dashed var(--line);border-radius:12px;padding:12px;margin-bottom:12px;}
+  .row-top{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .row-top .row-name{flex:1;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-family:inherit;font-size:14px;background:#FFFDF9;}
+  .row-top .row-name:focus{outline:none;border-color:var(--red);}
+  .row-del{background:none;border:none;cursor:pointer;color:#c2382f;font-size:16px;padding:6px 8px;border-radius:6px;flex-shrink:0;font-family:inherit;}
+  .row-del:hover{background:#FBE4E2;}
+  .row-label{display:block;font-size:12px;font-weight:700;color:var(--red-dark);margin:8px 0 5px;}
+  .row-class{width:100%;padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-family:inherit;font-size:14px;background:#FFFDF9;}
+  .row-class:focus{outline:none;border-color:var(--red);}
+  .toggle-group{display:flex;gap:6px;flex-wrap:wrap;}
+  .toggle-group button{flex:1;min-width:64px;padding:8px 8px;border-radius:8px;border:1.5px solid var(--line);background:#FFFDF9;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink);}
+  .toggle-group button.selected[data-val="ប្រុស"]{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .toggle-group button.selected[data-val="ស្រី"]{background:#B4487A;border-color:#B4487A;color:#fff;}
+  .toggle-group button.selected[data-val="fulltime"]{background:var(--purple);border-color:var(--purple);color:#fff;}
+  .toggle-group button.selected[data-val="english"]{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .toggle-group button.selected[data-val="khmer"]{background:var(--green);border-color:var(--green);color:#fff;}
+  .toggle-group button.selected[data-val="yes"]{background:var(--green);border-color:var(--green);color:#fff;}
+  .toggle-group button.selected[data-val="no"]{background:#c2382f;border-color:#c2382f;color:#fff;}
+  .addrowbtn{display:block;width:100%;padding:10px;border-radius:9px;border:1.5px dashed var(--red);background:#FFF7F3;color:var(--red-dark);font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;margin-top:4px;}
+  .addrowbtn:hover{background:#FDEAE0;}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;
+    font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.2);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  .toast.err{background:var(--red-dark);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="band">
+    <div class="badge">Mi</div>
+    <div>
+      <h1>ប្រព័ន្ធបែងចែកសិស្សតាមវេន</h1>
+      <p>គ្រប់គ្រងសិស្សប្រចាំវេន សិស្សសាកល្បង និងសិស្សទទួលការមើលថែ</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tabbtn active" data-tab="main">សិស្សប្រចាំវេន</button>
+    <button class="tabbtn" data-tab="trial">សិស្សសាកល្បង</button>
+    <button class="tabbtn" data-tab="care">សិស្សទទួលការមើលថែ</button>
+  </div>
+
+  <div class="panel active" id="panel-main">
+    <div class="addcard">
+      <h2>សិស្សថ្មី</h2>
+      <p class="lead">ចុចប៊ូតុងខាងក្រោមដើម្បីបញ្ចូលព័ត៌មានលម្អិត (ឈ្មោះ ភេទ កម្មវិធីសិក្សា ថ្នាក់ និងការទទួលមើលថែ)។ អាចបន្ថែមសិស្សច្រើននាក់ក្នុងពេលតែមួយ។</p>
+      <button class="addbtn" id="openAddModalBtn">＋ បន្ថែមសិស្សថ្មី</button>
+      <div class="hint">ពេលលុប ប្រព័ន្ធនឹងសួរព័ត៌មានលម្អិត (ថ្នាក់ គ្រូបន្ទុកថ្នាក់ ការមើលថែ) និងមូលហេតុជាមុនសិន។ របាយការណ៍ផ្ញើទៅ Telegram ស្វ័យប្រវត្តិ។</div>
+    </div>
+
+    <div class="board" id="pdfCapture">
+      <div class="col" data-cat="fulltime">
+        <div class="col-head"><h3>សិស្សរៀនពេញម៉ោង</h3><span class="count" id="count-fulltime">0</span></div>
+        <div class="col-body" id="list-fulltime"><div class="loading">កំពុងផ្ទុក...</div></div>
+        <div class="col-foot">សរុបសិស្ស <span id="foot-fulltime">0</span> នាក់</div>
+      </div>
+      <div class="col" data-cat="english">
+        <div class="col-head"><h3>សិស្សរៀនតែ English</h3><span class="count" id="count-english">0</span></div>
+        <div class="col-body" id="list-english"><div class="loading">កំពុងផ្ទុក...</div></div>
+        <div class="col-foot">សរុបសិស្ស <span id="foot-english">0</span> នាក់</div>
+      </div>
+      <div class="col" data-cat="khmer">
+        <div class="col-head"><h3>សិស្សរៀនតែខ្មែរ</h3><span class="count" id="count-khmer">0</span></div>
+        <div class="col-body" id="list-khmer"><div class="loading">កំពុងផ្ទុក...</div></div>
+        <div class="col-foot">សរុបសិស្ស <span id="foot-khmer">0</span> នាក់</div>
+      </div>
+
+      <div class="grandtotal">
+        <span class="gt-label">សិស្សសរុបទាំង៣វេន</span>
+        <span class="gt-value"><strong id="count-total">0</strong> នាក់</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <span>ទិន្នន័យរក្សាទុកស្វ័យប្រវត្តិ</span>
+      <div class="toolbar-actions">
+        <button class="pdfbtn" id="pdfBtn">⬇ ដោនឡូត PDF</button>
+        <button class="reset" id="resetBtn">សម្អាតទិន្នន័យវេនទាំងអស់</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-trial">
+    <div class="addcard">
+      <h2>ចុះឈ្មោះសិស្សសាកល្បង</h2>
+      <div class="addrow">
+        <input type="text" id="trialNameInput" placeholder="ឈ្មោះសិស្ស...">
+        <div class="seg">
+          <input type="radio" name="trialGender" id="tg-male" value="ប្រុស" checked>
+          <label data-cat="fulltime" for="tg-male">ប្រុស</label>
+          <input type="radio" name="trialGender" id="tg-female" value="ស្រី">
+          <label data-cat="english" for="tg-female">ស្រី</label>
+        </div>
+        <div class="seg">
+          <input type="radio" name="trialCat" id="tc-fulltime" value="fulltime" checked>
+          <label data-cat="fulltime" for="tc-fulltime">ពេញម៉ោង</label>
+          <input type="radio" name="trialCat" id="tc-english" value="english">
+          <label data-cat="english" for="tc-english">English</label>
+          <input type="radio" name="trialCat" id="tc-khmer" value="khmer">
+          <label data-cat="khmer" for="tc-khmer">ខ្មែរ</label>
+        </div>
+      </div>
+      <div class="addrow" style="margin-top:10px;">
+        <input type="date" id="trialDateInput">
+        <input type="text" id="trialDurationInput" placeholder="រយៈពេលសាកល្បង (ឧ. ១សប្តាហ៍, ២សប្តាហ៍, ១ខែ)">
+        <button class="addbtn" id="trialAddBtn">＋ ចុះឈ្មោះ</button>
+      </div>
+      <div class="hint">បញ្ចូលភេទ វេនដែលចង់សាកល្បង កាលបរិច្ឆេទចាប់ផ្តើម និងរយៈពេលសាកល្បង។</div>
+    </div>
+
+    <div class="simplecard">
+      <div class="head"><h3>បញ្ជីសិស្សសាកល្បង</h3><span class="count" id="trial-count">0</span></div>
+      <div class="body" id="trial-list"><div class="loading">កំពុងផ្ទុក...</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-care">
+    <div class="addcard">
+      <h2>បន្ថែមសិស្សទទួលការមើលថែ</h2>
+      <div class="addrow">
+        <input type="text" id="careNameInput" placeholder="ឈ្មោះសិស្ស...">
+        <input type="text" id="careNoteInput" placeholder="កំណត់សម្គាល់ (ស្រេចចិត្ត)...">
+        <button class="addbtn" id="careAddBtn">＋ បន្ថែម</button>
+      </div>
+      <div class="hint">សិស្សក្នុងបញ្ជីនេះគឺជាសិស្សដែលកំពុងទទួលការតាមដាន/មើលថែពិសេស។</div>
+    </div>
+
+    <div class="simplecard care">
+      <div class="head"><h3>សិស្សទទួលការមើលថែ</h3><span class="count" id="care-count">0</span></div>
+      <div class="body" id="care-list"><div class="loading">កំពុងផ្ទុក...</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>សិស្សឈប់</h3>
+    <p id="modalName">តើអ្នកចង់លុប "..." មែនទេ? សូមបញ្ជាក់មូលហេតុ (ស្រេចចិត្ត)</p>
+    <textarea id="reasonInput" placeholder="សរសេរមូលហេតុនៃការលុប..."></textarea>
+
+    <div class="modal-extra" id="modalExtra" style="display:none;">
+      <label>រៀនថ្នាក់ណា</label>
+      <input type="text" id="classInput" placeholder="ឧ. ថ្នាក់ទី៧, វេនព្រឹក...">
+
+      <label>គ្រូបន្ទុកថ្នាក់</label>
+      <input type="text" id="teacherInput" placeholder="ឈ្មោះគ្រូបន្ទុកថ្នាក់...">
+
+      <label>ទទួលការមើលថែឬអត់?</label>
+      <div class="caretoggle" id="careToggle">
+        <button type="button" data-val="yes">ទទួល</button>
+        <button type="button" data-val="no">មិនទទួល</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel" id="modalCancel">បោះបង់</button>
+      <button class="confirm" id="modalConfirm">លុប</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add student(s) modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal add-modal">
+    <h3>បន្ថែមសិស្សថ្មី</h3>
+    <p>បំពេញព័ត៌មានសិស្ស ១ ឬច្រើននាក់ រួចចុច "បន្ថែម"</p>
+    <div id="addRows"></div>
+    <button type="button" class="addrowbtn" id="addRowBtn">＋ បន្ថែមជួរថ្មី</button>
+    <div class="modal-actions">
+      <button class="cancel" id="addModalCancel">បោះបង់</button>
+      <button class="confirm" id="addModalConfirm">បន្ថែម</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const TELEGRAM_BOT_TOKEN = '8501623225:AAGu-F_GHSQ-dLBrEME7eidOpW2yDf3qvXw';
+const SUMMARY_CHAT_ID = '-1003814592979';
+
+const STORAGE_MAIN = "roster/main";
+const STORAGE_TRIAL = "roster/trial";
+const STORAGE_CARE = "roster/care";
+const CATS = ["fulltime","english","khmer"];
+const CAT_LABEL = {fulltime:"ពេញម៉ោង", english:"តែអង់គ្លេស", khmer:"តែខ្មែរ"};
+
+let roster = [];
+let trials = [];
+let cares  = [];
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(str){ const d=document.createElement("div"); d.textContent=str; return d.innerHTML; }
+function todayStr(){
+  const d=new Date();
+  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+}
+
+const PRESET = [
+  {n:"សុប័ណ្ណ សោម៉ា", c:"khmer"}, {n:"ដួន សុមេធា", c:"english"}, 
+  {n:"ភឺន ថិរ៉យុ", c:"khmer"}, {n:"ពិសិទ្ធ ចាន់វឌ្ឍនា", c:"fulltime"},
+  {n:"ពន្លក វីរៈសិទ្ធិ", c:"english"}, {n:"ឈឿន ប៊ុនធឿនពុទ្ធិ", c:"fulltime"},
+  {n:"រតនា សៀវលិ", c:"english"}, {n:"សុភ័ក្រ វីរៈបុត្រ", c:"fulltime"},
+  {n:"ហេង វិវឌ្ឍនៈ", c:"khmer"}, {n:"សុផល ម៉េងឆាយ", c:"fulltime"}, {n:"វុឌ្ឍី ដាវីក", c:"fulltime"},
+  {n:"ប៊ូ សាធុការ", c:"khmer"}, {n:"វិចកឆិកា មុន្នីទេពី", c:"english"}, {n:"ហេង សុីងតឺ", c:"fulltime"},
+  {n:"សេន យ៉ាស្មីណា", c:"khmer"}, {n:"យឹម ពុទ្ធិវង្ស", c:"english"}, {n:"វ៉េត នីរីតា", c:"fulltime"},
+  {n:"ដន សុភ័ណ្ណម៉ូនីកា", c:"khmer"}, {n:"ឈុំ វិសុទ្ធ", c:"english"}, {n:"ហុី មុីអុីង", c:"fulltime"},
+  {n:"វ៉ាន កញ្ញា", c:"english"}, {n:"អុំ រតនាសិទ្ធការ្យ", c:"fulltime"},
+  {n:"មិត្ត ម៉េងហួរ", c:"khmer"}, {n:"សុង សិរីបុត្រ", c:"english"}, {n:"សុីម សិទ្ធិកា", c:"fulltime"},
+  {n:"យស់ នរិន្ទ", c:"khmer"},  {n:"តាំង ហ៊ួយលីន", c:"fulltime"},
+  {n:"សំបុក ពុទ្ធិតា", c:"khmer"}, {n:"អ៊ុក ច័ន្ទបូរមី", c:"english"}, {n:"និត សុធារ៉ា", c:"fulltime"},
+  {n:"ប៊ូ តាម៉ា", c:"khmer"},  {n:"ហ៊ុយ វណ្ណាចេស្តា", c:"fulltime"},
+  {n:"កែវ មុន្នីឧត្តម", c:"khmer"}, {n:"សេង គីមលីង", c:"english"}, {n:"ថិន ទៀនវិន", c:"fulltime"},
+  {n:"វន្ដវិន ថាណា", c:"khmer"}, {n:"តិន ជូអុី", c:"english"}, {n:"សឿន ច័ន្ទសុមេធា", c:"fulltime"},
+  {n:"ស្រស់ រីហ្សោ", c:"khmer"}, {n:"ឆាង សុីងអាយ", c:"english"}, {n:"ប៊ុន រីខេមរា", c:"fulltime"},
+  {n:"ចន្ថា លីតា", c:"khmer"}, {n:"ធី សុវណ្ណសិទ្ធិការ", c:"english"}, {n:"សូ រស្មីពនិតា", c:"fulltime"},
+  {n:"ប៉ុន រីយ៉ា", c:"khmer"}, {n:"ផន សុខហៀង", c:"english"}, {n:"សេរី ចាន់វឌ្ឍនា", c:"fulltime"},
+  {n:"វង្ស មុន្នីកញ្ញា", c:"khmer"}, 
+  {n:"ឃុន ទេពង្ស", c:"khmer"}, {n:"អ៊ាប លីយីង", c:"english"}, {n:"លី ឆាយឈ័ន", c:"fulltime"},
+  {n:"ហេង សន្តិភាព", c:"english"},{n:"ថាំង​ សុលីតា", c:"english"}, {n:"ចាវ វិនហាវ", c:"fulltime"},
+  {n:"សុបញ្ញា មុន្នីរាជ", c:"khmer"}, {n:"ឆន ម៉េងសុីន", c:"english"}, {n:"ងួន បញ្ញាពុទ្ធិសក្ត", c:"fulltime"},
+  {n:"សាន្ត លីប៉េង", c:"khmer"}, {n:"វីរៈ សិទ្ធការ្យ", c:"khmer"}, {n:"ទីវ សិទ្ធលីយ៉ា", c:"khmer"}, 
+  {n:"អេង លីឆេង", c:"khmer"}, {n:"ឆាយ ភីងអុី", c:"english"}, {n:"ស្រ៊ាង សៀវហ្វុង", c:"fulltime"},
+  {n:"ចន្ថា វឌ្ឍនា", c:"khmer"}, {n:"បញ្ញា ចន្ទភេត្រា", c:"english"}, 
+  {n:"យ៉ាប់ សុខឡេង", c:"khmer"}, {n:"ថាំង សុមុន្នី", c:"english"},{n:"រ័ត្ន រ៉ាថេប", c:"fulltime"},
+  {n:"លន វេស្សភូ", c:"khmer"}, {n:"ធេង ជូលីញ", c:"english"}, {n:"ពៅ សុខចិន", c:"fulltime"},
+  {n:"ថូ សិទ្ធីយូណា", c:"khmer"}, {n:"ហុង សិទ្ធិណាល់", c:"english"}, {n:"ណារ៉ា ហេងលី", c:"fulltime"},
+  {n:"សុីម សរឧត្តម", c:"khmer"}, {n:"សុខ សម្បត្តិ", c:"fulltime"},
+  {n:"ថន សុីវហ្គិច", c:"english"}, {n:"សុខ ដាលីស", c:"fulltime"},
+  {n:"គ្រី សុមុន្នី", c:"khmer"}, {n:"ធេង ម៉េងលី", c:"english"}, {n:"ចន្ទ សុផាយ៉ាមេឃ", c:"fulltime"},
+  {n:"រ័ត្ន សុវណ្ណចាន់ណាកា", c:"english"}, {n:"ឆុន មរកត", c:"english"},{n:"សេង សាណា", c:"fulltime"},
+  {n:"និត សុធារាជ", c:"khmer"}, {n:"សុង រិទ្ធិស័ក្ក", c:"english"}, {n:"ស៊ន វីរៈបញ្ញាទេពី", c:"fulltime"},
+  {n:"សាយ សុខហេង", c:"khmer"}, {n:"អ៊ឹម រេចនា", c:"fulltime"},
+  {n:"វាសនា សុម៉ាលី", c:"khmer"},{n:"កែវ វិនសុឧត្តតារា", c:"fulltime"},
+  {n:"សុខ សុវណ្ណេណត", c:"khmer"}, {n:"អោក និស្សិត", c:"english"}, {n:"ឈុនតា រតនៈខុនដូ", c:"fulltime"},
+  {n:"លួត ស្រីព្រជ", c:"khmer"}, {n:"អោក ឧត្តម", c:"english"}, {n:"យ៉ាព្រជ ម៉ូនីកា", c:"fulltime"},
+  {n:"ឌី រស្មីមុទិតា", c:"khmer"}, {n:"ណារ៉ា ហេងឡាយ", c:"english"}, {n:"លីម ពុទ្ធិរាជ", c:"fulltime"},
+  {n:"សំណាង វីរៈបុត្រ", c:"khmer"}, {n:"ឈូក ឈិនឡុង", c:"english"}, {n:"ឡ សុីវហ៊ួយ", c:"fulltime"},
+  {n:"ឈន ចេស្តា", c:"khmer"}, {n:"សុភក្តិ រតនៈ", c:"english"}, {n:"ឡាយ មុន្នីចិន្ដា", c:"fulltime"},
+  {n:"អ៊ូ សុវណ្ណវេហស៍", c:"khmer"}, {n:"សុភក្តិ ទិត្យដាណា", c:"english"},
+  {n:"លីម លីម៉េងគង្គ", c:"khmer"}, {n:"ផល សុវណ្ណ", c:"english"}, {n:"ឡាយ ភារ៉ាដាវីឌ", c:"fulltime"},
+  {n:"ឈុំ វីរៈសិទ្ធិ", c:"khmer"}, {n:"វណ្ណា សុវណ្ណារាជ", c:"english"},{n:"ហង់ កែវវិសុទ្ធ", c:"fulltime"},
+  {n:"ឡ សុវណ្ណហាន់ណា", c:"fulltime"},{n:"ភឺន ថិរ៉ាយុ", c:"fulltime"},
+  {n:"រិទ្ធី ពិស្សុតស្រកឹត", c:"khmer"}, {n:"កន វជីរ៉ាកល្យាណី", c:"english"}, {n:"ពៅ សុនីតា", c:"fulltime"},
+  {n:"ហូ លីភីង", c:"english"},{n:"នីរ៉ា សូរីយ៉ា", c:"english"},
+  {n:"សុផល ម៉េងហួរ", c:"fulltime"}, {n:"ចាន់ នីស៊ូសាន់ណា", c:"fulltime"},{n:"អឿន ពៅវល័ក្ខ", c:"fulltime"},
+  {n:"យន់ លីហេង", c:"khmer"},                                     {n:"សារ៉ាត មានបេជ្រមរកត", c:"fulltime"},
+  {n:"សូយ រក្សា", c:"khmer"}, 
+  {n:"ប៊ឹម មុីជូ", c:"khmer"},
+  {n:"មិត្ត ម៉េងហេង", c:"khmer"},
+  {n:"យ៉ាន់ សៀវលិញ", c:"khmer"},
+  {n:"សុភ័ក្រ វីរៈសិទ្ធិ", c:"khmer"},
+  {n:"អៀ ជីងហ័រ", c:"khmer"},
+  {n:"លីម ហុីប៉ា", c:"khmer"},
+  {n:"ជាឡិច កូលីន", c:"khmer"},
+  {n:"អៀវ ហាក់លីវីឆៃ", c:"khmer"},
+  {n:"វិសាល​ សុព័ណ៍បេឡា", c:"khmer"}
+  
+];
+
+const CARE_PRESET = [
+  {n:"ឈឿន ប៊ុនធឿនពុទ្ធិ"}, {n:"ឡាយ បុន្នីចិន្ដា"}, {n:"ឡាយ ភារាដាវីឌ"}, {n:"អឿន ពៅវលក្ល"},
+  {n:"ងួន បញ្ញាពុទ្ធិស័ក្តិ"}, {n:"សារ៉ាត់ មានពេជ្រមរកត"}, {n:"ចាន់ នីស៊ូសាណា"}, {n:"យ៉ាពេជ្រម៉ូនីកា"},
+  {n:"ស្រ៊ាង សៀវហ្វុង"}, {n:"លីណា រ័ត្នហុងស័ក្តិអធិភូ"}, {n:"អ៊ុំរតនា សិទ្ធិការ្យ"}, {n:"បេរ៉េស ម៉ៃឃើស"},
+  {n:"សុភក្រ័ វីរៈសិទ្ធ"}, {n:"ហេង មុីអុិ"}, {n:"ហេង ស៊ីងតឺ"}, {n:"វ៉េត នីរីតា"},
+  {n:"ងីន ទៀនវិន"}, {n:"ហ៊ី ម៉ីអុីង"},
+  {n:"ហាន សុីវហ័រ", note:"ទទួលការមើលថែតែ១ខែនេះទៀតទេ ព្រោះអូនត្រូវផ្លាស់ប្ដូរសាលាទៅសាលាទួនហ្វាវិញ ដោយសារប៉ាគាត់ជាចិន គាត់ចង់ឱ្យអូនរៀនចិនឱ្យបានច្រើនវិញ"},
+  {n:"ហុី ប៉ៗ"}, {n:"មិត្ត ម៉េងហេង"}, {n:"មិត្ត ម៉េងហួរ"},
+  {n:"ហុី ជីងជីង", note:"ទទួលការមើលថែតែ១ខែទេ ព្រោះប៉ារបស់គាត់សុំផ្អាកសិន សាលារបស់គាត់គេវ៉ាកង់"}
+];
+
+let dbApi = null;
+async function initDb(){
+  try{ dbApi = await claude.use("db"); }
+  catch(e){ dbApi = null; }
+  if(!dbApi) showToast("មិនអាចភ្ជាប់ទៅកន្លែងផ្ទុកទិន្នន័យបានទេ", true);
+}
+
+async function loadKey(path, presetMapper){
+  if(dbApi){
+    try{
+      const snap = await dbApi.doc(path).get();
+      if(snap.exists && snap.data() && Array.isArray(snap.data().items)) return snap.data().items;
+    }catch(e){ console.error(e); }
+  }
+  const seeded = presetMapper ? presetMapper() : [];
+  if(dbApi){
+    try{ await dbApi.doc(path).set({items: seeded}); }catch(e2){ console.error(e2); }
+  }
+  return seeded;
+}
+async function saveKey(path, data){
+  if(!dbApi){ showToast("មិនអាចរក្សាទុកទិន្នន័យបានទេ", true); return; }
+  try{ await dbApi.doc(path).set({items: data}); }
+  catch(e){ console.error("DB error:", e); showToast("មិនអាចរក្សាទុកទិន្នន័យបានទេ", true); }
+}
+
+function showToast(msg, isErr){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.toggle("err", !!isErr);
+  t.classList.add("show");
+  clearTimeout(showToast._tid);
+  showToast._tid = setTimeout(()=> t.classList.remove("show"), 3000);
+}
+
+// ---- Delete modal --------------------------------------------------------
+// When `extended` is true (used for the main roster panel) the modal also
+// asks for the class the student was in, the homeroom teacher's name, and
+// whether the student is receiving care follow-up. These extra fields are
+// then attached to the Telegram report.
+let careSelection = "";
+
+function askDeleteReason(name, extended){
+  return new Promise(resolve=>{
+    const overlay = document.getElementById("overlay");
+    const reasonInput = document.getElementById("reasonInput");
+    const modalExtra = document.getElementById("modalExtra");
+    const classInput = document.getElementById("classInput");
+    const teacherInput = document.getElementById("teacherInput");
+    const careToggle = document.getElementById("careToggle");
+    const careBtns = Array.from(careToggle.querySelectorAll("button"));
+
+    document.getElementById("modalName").textContent = `តើអ្នកចង់លុប "${name}" មែនទេ? សូមបញ្ជាក់មូលហេតុ (ស្រេចចិត្ត)`;
+    reasonInput.value = "";
+    classInput.value = "";
+    teacherInput.value = "";
+    careSelection = "";
+    careBtns.forEach(b=> b.classList.remove("sel-yes","sel-no"));
+    modalExtra.style.display = extended ? "block" : "none";
+
+    overlay.classList.add("show");
+    reasonInput.focus();
+
+    function onCareClick(e){
+      const val = e.currentTarget.getAttribute("data-val");
+      careSelection = val;
+      careBtns.forEach(b=>{
+        b.classList.remove("sel-yes","sel-no");
+        if(b.getAttribute("data-val")===careSelection){
+          b.classList.add(val==="yes" ? "sel-yes" : "sel-no");
+        }
+      });
+    }
+    careBtns.forEach(b=> b.addEventListener("click", onCareClick));
+
+    const confirmBtn = document.getElementById("modalConfirm");
+    const cancelBtn = document.getElementById("modalCancel");
+
+    function cleanup(){
+      overlay.classList.remove("show");
+      confirmBtn.removeEventListener("click", onConfirm);
+      cancelBtn.removeEventListener("click", onCancel);
+      careBtns.forEach(b=> b.removeEventListener("click", onCareClick));
+    }
+    function onConfirm(){
+      const r = reasonInput.value.trim();
+      const result = {
+        reason: r || "(មិនបានបញ្ជាក់)",
+        className: extended ? classInput.value.trim() : "",
+        teacher: extended ? teacherInput.value.trim() : "",
+        care: extended ? (careSelection==="yes" ? "ទទួល" : careSelection==="no" ? "មិនទទួល" : "-") : ""
+      };
+      cleanup();
+      resolve(result);
+    }
+    function onCancel(){ cleanup(); resolve(null); }
+    confirmBtn.addEventListener("click", onConfirm);
+    cancelBtn.addEventListener("click", onCancel);
+  });
+}
+
+document.querySelectorAll(".tabbtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+async function loadMain(){
+  roster = await loadKey(STORAGE_MAIN, ()=> PRESET.map(p=>({id:uid(), name:p.n, gender:"", category:p.c, className:"", care:""})));
+  renderMain();
+}
+function renderMain(){
+  let total = 0;
+  CATS.forEach(cat=>{
+    const items = roster.filter(s=>s.category===cat);
+    total += items.length;
+    document.getElementById("count-"+cat).textContent = items.length;
+    document.getElementById("foot-"+cat).textContent = items.length;
+    const listEl = document.getElementById("list-"+cat);
+    listEl.innerHTML = items.length===0 ? '<div class="empty">មិនទាន់មានសិស្សនៅឡើយ</div>' :
+      items.map((s,i)=>{
+        const gClass = s.gender==="ប្រុស" ? "male" : (s.gender==="ស្រី" ? "female" : "unknown");
+        const metaParts = [];
+        if(s.className) metaParts.push("ថ្នាក់៖ " + escapeHtml(s.className));
+        if(s.care==="yes") metaParts.push("ទទួលការមើលថែ");
+        else if(s.care==="no") metaParts.push("មិនទទួលការមើលថែ");
+        const metaLine = metaParts.length ? `<span class="meta">${metaParts.join(" • ")}</span>` : "";
+        return `<div class="card">
+          <div class="info">
+            <span><span class="num">${i+1}.</span><span class="gtag ${gClass}">${s.gender||"?"}</span>${escapeHtml(s.name)}</span>
+            ${metaLine}
+          </div>
+          <button class="del" data-id="${s.id}" title="លុប">✕</button>
+        </div>`;
+      }).join("");
+  });
+  document.getElementById("count-total").textContent = total;
+  document.querySelectorAll("#panel-main .del").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-id");
+      const removed = roster.find(s=>s.id===id);
+      if(!removed) return;
+      const result = await askDeleteReason(removed.name, true);
+      if(result===null) return;
+      roster = roster.filter(s=>s.id!==id);
+      await saveKey(STORAGE_MAIN, roster);
+      renderMain();
+      sendTelegramReport({
+        name:removed.name, gender:removed.gender, category:removed.category, action:"remove",
+        reason:result.reason, className:result.className, teacher:result.teacher, care:result.care
+      });
+    });
+  });
+}
+
+// ---- Add student(s) modal (supports multiple rows) -----------------------
+let addRowCounter = 0;
+
+function addRowHtml(){
+  return `
+  <div class="add-row-item">
+    <div class="row-top">
+      <input type="text" class="row-name" placeholder="ឈ្មោះសិស្ស...">
+      <button type="button" class="row-del" title="លុបជួរនេះ">✕</button>
+    </div>
+    <label class="row-label">ភេទ</label>
+    <div class="toggle-group gender-toggle">
+      <button type="button" data-val="ប្រុស" class="selected">ប្រុស</button>
+      <button type="button" data-val="ស្រី">ស្រី</button>
+    </div>
+    <label class="row-label">កម្មវិធីសិក្សា</label>
+    <div class="toggle-group cat-toggle">
+      <button type="button" data-val="fulltime" class="selected">ពេញម៉ោង</button>
+      <button type="button" data-val="english">English</button>
+      <button type="button" data-val="khmer">ខ្មែរ</button>
+    </div>
+    <label class="row-label">ថ្នាក់</label>
+    <input type="text" class="row-class" placeholder="ឧ. ថ្នាក់ទី៧, វេនព្រឹក...">
+    <label class="row-label">ទទួលការមើលថែឬអត់?</label>
+    <div class="toggle-group care-toggle">
+      <button type="button" data-val="yes">ទទួល</button>
+      <button type="button" data-val="no">មិនទទួល</button>
+    </div>
+  </div>`;
+}
+
+function bindRow(rowEl){
+  rowEl.querySelectorAll(".toggle-group").forEach(group=>{
+    const btns = Array.from(group.querySelectorAll("button"));
+    btns.forEach(b=> b.addEventListener("click", ()=>{
+      btns.forEach(x=>x.classList.remove("selected"));
+      b.classList.add("selected");
+    }));
+  });
+  rowEl.querySelector(".row-del").addEventListener("click", ()=>{
+    const rows = document.querySelectorAll("#addRows .add-row-item");
+    if(rows.length<=1){
+      rowEl.querySelector(".row-name").value = "";
+      rowEl.querySelector(".row-class").value = "";
+      rowEl.querySelectorAll(".toggle-group").forEach(g=>{
+        g.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+      });
+      rowEl.querySelector('.gender-toggle button[data-val="ប្រុស"]').classList.add("selected");
+      rowEl.querySelector('.cat-toggle button[data-val="fulltime"]').classList.add("selected");
+      return;
+    }
+    rowEl.remove();
+  });
+}
+
+function addNewRow(){
+  addRowCounter++;
+  const wrap = document.getElementById("addRows");
+  const holder = document.createElement("div");
+  holder.innerHTML = addRowHtml();
+  const rowEl = holder.firstElementChild;
+  wrap.appendChild(rowEl);
+  bindRow(rowEl);
+  rowEl.querySelector(".row-name").focus();
+}
+
+function resetAddModal(){
+  document.getElementById("addRows").innerHTML = "";
+  addRowCounter = 0;
+  addNewRow();
+}
+
+document.getElementById("openAddModalBtn").addEventListener("click", ()=>{
+  resetAddModal();
+  document.getElementById("addOverlay").classList.add("show");
+});
+document.getElementById("addRowBtn").addEventListener("click", addNewRow);
+document.getElementById("addModalCancel").addEventListener("click", ()=>{
+  document.getElementById("addOverlay").classList.remove("show");
+});
+document.getElementById("addModalConfirm").addEventListener("click", async ()=>{
+  const rowEls = Array.from(document.querySelectorAll("#addRows .add-row-item"));
+  const newStudents = [];
+  rowEls.forEach(rowEl=>{
+    const name = rowEl.querySelector(".row-name").value.trim();
+    if(!name) return;
+    const genderBtn = rowEl.querySelector(".gender-toggle button.selected");
+    const catBtn = rowEl.querySelector(".cat-toggle button.selected");
+    const careBtn = rowEl.querySelector(".care-toggle button.selected");
+    const className = rowEl.querySelector(".row-class").value.trim();
+    newStudents.push({
+      id:uid(),
+      name,
+      gender: genderBtn ? genderBtn.getAttribute("data-val") : "",
+      category: catBtn ? catBtn.getAttribute("data-val") : "fulltime",
+      className,
+      care: careBtn ? careBtn.getAttribute("data-val") : ""
+    });
+  });
+  if(newStudents.length===0){
+    showToast("សូមបញ្ចូលឈ្មោះសិស្សយ៉ាងហោចណាស់ម្នាក់", true);
+    return;
+  }
+  roster.push(...newStudents);
+  await saveKey(STORAGE_MAIN, roster);
+  renderMain();
+  document.getElementById("addOverlay").classList.remove("show");
+  showToast(`បានបន្ថែមសិស្ស ${newStudents.length} នាក់ ✓`);
+  for(const s of newStudents){
+    await sendTelegramReport({
+      name:s.name, gender:s.gender, category:s.category, action:"add",
+      className:s.className,
+      care: s.care==="yes" ? "ទទួល" : s.care==="no" ? "មិនទទួល" : ""
+    });
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", async ()=>{
+  if(!confirm("តើអ្នកចង់លុបទិន្នន័យសិស្សប្រចាំវេនទាំងអស់មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។")) return;
+  roster = [];
+  await saveKey(STORAGE_MAIN, roster);
+  renderMain();
+});
+
+document.getElementById("pdfBtn").addEventListener("click", async ()=>{
+  const btn = document.getElementById("pdfBtn");
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "កំពុងបង្កើត PDF...";
+
+  const target = document.getElementById("pdfCapture");
+  const prevWidth = target.style.width;
+  const prevGrid = target.style.gridTemplateColumns;
+  const prevMaxWidth = target.style.maxWidth;
+  target.style.maxWidth = "none";
+  target.style.width = "1100px";
+  target.style.gridTemplateColumns = "repeat(3, 1fr)";
+  await new Promise(r => requestAnimationFrame(()=> requestAnimationFrame(r)));
+
+  try{
+    const SCALE = 2;
+
+    const targetRect = target.getBoundingClientRect();
+    const cutPoints = new Set([Math.round(targetRect.height)]);
+    target.querySelectorAll(".card").forEach(card=>{
+      const r = card.getBoundingClientRect();
+      cutPoints.add(Math.round(r.bottom - targetRect.top));
+    });
+    const sortedCutsCss = Array.from(cutPoints).sort((a,b)=>a-b);
+
+    const canvas = await html2canvas(target, {
+      scale: SCALE,
+      backgroundColor: "#FBF7EF",
+      useCORS: true,
+      windowWidth: Math.max(document.documentElement.scrollWidth, 1150)
+    });
+
+    const pxPerCss = canvas.width / targetRect.width;
+    const sortedCutsPx = sortedCutsCss.map(v=> Math.round(v * pxPerCss));
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 8;
+    const usableWidth = pageWidth - margin * 2;
+    const usableHeight = pageHeight - margin * 2;
+    const pxPerMm = canvas.width / usableWidth;
+    const pageHeightPx = Math.floor(usableHeight * pxPerMm);
+
+    let cursor = 0;
+    let firstPage = true;
+    while (cursor < canvas.height - 1) {
+      const limit = cursor + pageHeightPx;
+      const candidates = sortedCutsPx.filter(p => p > cursor && p <= limit);
+      let cut = candidates.length ? candidates[candidates.length - 1] : Math.min(limit, canvas.height);
+      cut = Math.min(cut, canvas.height);
+      if (cut <= cursor) cut = Math.min(limit, canvas.height);
+
+      const sliceHeightPx = cut - cursor;
+      const sliceCanvas = document.createElement("canvas");
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = sliceHeightPx;
+      const sctx = sliceCanvas.getContext("2d");
+      sctx.fillStyle = "#FBF7EF";
+      sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      sctx.drawImage(canvas, 0, cursor, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+      const sliceData = sliceCanvas.toDataURL("image/png");
+      const sliceHeightMm = sliceHeightPx / pxPerMm;
+
+      if (!firstPage) pdf.addPage();
+      pdf.addImage(sliceData, "PNG", margin, margin, usableWidth, sliceHeightMm);
+      firstPage = false;
+      cursor = cut;
+    }
+
+    pdf.save(`សិស្សប្រចាំវេន_${todayStr().replace(/\//g,"-")}.pdf`);
+    showToast("បានដោនឡូត PDF ✓");
+  }catch(e){
+    console.error("PDF export failed:", e);
+    showToast("មិនអាចបង្កើត PDF បានទេ", true);
+  }finally{
+    target.style.width = prevWidth;
+    target.style.gridTemplateColumns = prevGrid;
+    target.style.maxWidth = prevMaxWidth;
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+async function sendTelegramReport({name, gender, category, action, reason, className, teacher, care}){
+  const counts = {
+    fulltime: roster.filter(s=>s.category==="fulltime").length,
+    khmer: roster.filter(s=>s.category==="khmer").length,
+    english: roster.filter(s=>s.category==="english").length
+  };
+  const grandTotal = counts.fulltime + counts.khmer + counts.english;
+  const actionLabel = action==="add" ? "➕ សិស្សថ្មី" : "➖ សិស្សឈប់";
+  const sign = action==="add" ? "+1" : "-1";
+  const catChanged = category==="fulltime" ? "សរុបសិស្សរៀនពេញម៉ោង"
+                    : category==="khmer" ? "សរុបសិស្សរៀនតែភាសាខ្មែរ"
+                    : "សរុបសិស្សរៀនតែអង់គ្លេស";
+  let text =
+`${actionLabel}
+
+ឈ្មោះសិស្ស: ${name}
+ភេទ: ${gender || "-"}
+កាលបរិច្ឆេទ: ${todayStr()}
+ប្រភេទសិស្ស: ${CAT_LABEL[category]}`;
+
+  if(className) text += `\nរៀនថ្នាក់: ${className}`;
+  if(teacher) text += `\nគ្រូបន្ទុកថ្នាក់: ${teacher}`;
+  if(care) text += `\nទទួលការមើលថែ: ${care}`;
+  if(action==="remove"){
+    text += `\nមូលហេតុ: ${reason}`;
+  }
+
+  text += `
+
+${catChanged}: ${counts[category]} (${sign})
+
+--- សរុបទាំងអស់បច្ចុប្បន្ន ---
+សិស្សសរុបរៀនពេញម៉ោង: ${counts.fulltime}
+សរុបសិស្សរៀនតែភាសាខ្មែរ: ${counts.khmer}
+សរុបសិស្សរៀនតែអង់គ្លេស: ${counts.english}
+សិស្សសរុបទាំង៣វេន: ${grandTotal}`;
+
+  try{
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({chat_id: SUMMARY_CHAT_ID, text})
+    });
+    const data = await res.json();
+    if(data.ok) showToast("បានផ្ញើរបាយការណ៍ទៅ Telegram ✓");
+    else showToast("Telegram បដិសេធសារ៖ " + (data.description||"unknown error"), true);
+  }catch(e){
+    console.error("Telegram send failed:", e);
+    showToast("មិនអាចផ្ញើទៅ Telegram បានទេ", true);
+  }
+}
+
+async function loadTrials(){
+  trials = await loadKey(STORAGE_TRIAL, ()=> []);
+  renderTrials();
+}
+function renderTrials(){
+  document.getElementById("trial-count").textContent = trials.length;
+  const el = document.getElementById("trial-list");
+  el.innerHTML = trials.length===0 ? '<div class="empty">មិនទាន់មានសិស្សសាកល្បងទេ</div>' :
+    trials.map((s,i)=>{
+      const gClass = s.gender==="ប្រុស" ? "male" : (s.gender==="ស្រី" ? "female" : "unknown");
+      const dateTxt = s.startDate ? s.startDate.split("-").reverse().join("/") : "-";
+      return `<div class="card">
+        <div class="info">
+          <span><span class="num">${i+1}.</span><span class="gtag ${gClass}">${s.gender||"?"}</span><span class="catpill ${s.category}">${CAT_LABEL[s.category]}</span> ${escapeHtml(s.name)}</span>
+          <span class="meta">ចាប់ផ្តើម៖ ${dateTxt} • រយៈពេល៖ ${escapeHtml(s.duration || "-")}</span>
+        </div>
+        <button class="del" data-id="${s.id}" title="លុប">✕</button>
+      </div>`;
+    }).join("");
+  document.querySelectorAll("#panel-trial .del").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-id");
+      const removed = trials.find(s=>s.id===id);
+      if(!removed) return;
+      const result = await askDeleteReason(removed.name, false);
+      if(result===null) return;
+      trials = trials.filter(s=>s.id!==id);
+      await saveKey(STORAGE_TRIAL, trials);
+      renderTrials();
+    });
+  });
+}
+document.getElementById("trialAddBtn").addEventListener("click", async ()=>{
+  const nameInput = document.getElementById("trialNameInput");
+  const name = nameInput.value.trim();
+  if(!name){ nameInput.focus(); return; }
+  const gender = document.querySelector('input[name="trialGender"]:checked').value;
+  const category = document.querySelector('input[name="trialCat"]:checked').value;
+  const startDate = document.getElementById("trialDateInput").value;
+  const duration = document.getElementById("trialDurationInput").value.trim();
+  trials.push({id:uid(), name, gender, category, startDate, duration});
+  nameInput.value = "";
+  document.getElementById("trialDurationInput").value = "";
+  nameInput.focus();
+  await saveKey(STORAGE_TRIAL, trials);
+  renderTrials();
+});
+
+async function loadCares(){
+  cares = await loadKey(STORAGE_CARE, ()=> CARE_PRESET.map(p=>({id:uid(), name:p.n, note:p.note||""})));
+  renderCares();
+}
+function renderCares(){
+  document.getElementById("care-count").textContent = cares.length;
+  const el = document.getElementById("care-list");
+  el.innerHTML = cares.length===0 ? '<div class="empty">មិនទាន់មានសិស្សក្នុងបញ្ជីនេះទេ</div>' :
+    cares.map((s,i)=>`<div class="card">
+        <div class="info">
+          <span><span class="num">${i+1}.</span>${escapeHtml(s.name)}</span>
+          ${s.note ? `<span class="meta">${escapeHtml(s.note)}</span>` : ""}
+        </div>
+        <button class="del" data-id="${s.id}" title="លុប">✕</button>
+      </div>`).join("");
+  document.querySelectorAll("#panel-care .del").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-id");
+      const removed = cares.find(s=>s.id===id);
+      if(!removed) return;
+      const result = await askDeleteReason(removed.name, false);
+      if(result===null) return;
+      cares = cares.filter(s=>s.id!==id);
+      await saveKey(STORAGE_CARE, cares);
+      renderCares();
+    });
+  });
+}
+document.getElementById("careAddBtn").addEventListener("click", async ()=>{
+  const nameInput = document.getElementById("careNameInput");
+  const noteInput = document.getElementById("careNoteInput");
+  const name = nameInput.value.trim();
+  if(!name){ nameInput.focus(); return; }
+  const note = noteInput.value.trim();
+  cares.push({id:uid(), name, note});
+  nameInput.value = ""; noteInput.value = "";
+  nameInput.focus();
+  await saveKey(STORAGE_CARE, cares);
+  renderCares();
+});
+
+(async function init(){
+  await initDb();
+  await loadMain();
+  await loadTrials();
+  await loadCares();
+})();
+</script>
+</body>
+</html>
